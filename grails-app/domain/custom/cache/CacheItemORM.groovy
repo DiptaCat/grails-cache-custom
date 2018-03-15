@@ -31,7 +31,11 @@ class CacheItemORM {
     }
 
     Serializable getValue() {
-        return this.value == null ? null : byteArrayToSerial(this.value.getBytes(0l, (int) this.value.length()))
+        if (this.value == null) {
+            return null
+        }
+
+        streamToSerial(this.value.binaryStream)
     }
 
 
@@ -54,12 +58,12 @@ class CacheItemORM {
         byteArray
     }
 
-    private static Serializable byteArrayToSerial(byte[] bytes) {
+
+    private static Serializable streamToSerial(InputStream is) {
         ObjectInput oi = null
-        ByteArrayInputStream bis = new ByteArrayInputStream(bytes)
         Serializable serial = null
         try {
-            oi = new ObjectInputStream(bis)
+            oi = new ObjectInputStream(is)
             Object o = oi.readObject()
             serial = (Serializable) o
         } finally {
