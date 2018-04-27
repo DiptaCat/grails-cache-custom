@@ -36,6 +36,8 @@ dependencies {
     testCompile "org.grails:grails-plugin-testing"
 
     compile 'org.xbib.groovy:groovy-crypt:1.0.0'
+
+    compile 'org.infinispan:infinispan-core:9.2.1.Final'
 }
 
 bootRun {
@@ -58,3 +60,10 @@ bootRun {
 //    developers = [johndoe:"John Doe"]
 //}
 
+//TODO: Delete
+test {
+    testLogging.showStandardStreams = true
+    testLogging {
+        events "passed"
+    }
+}
