@@ -1,14 +1,24 @@
 package grails.plugin.cache.custom.infinispan
 
+import grails.testing.spring.AutowiredTest
+import org.infinispan.manager.DefaultCacheManager
+import org.infinispan.manager.EmbeddedCacheManager
 import spock.lang.Shared
 import spock.lang.Specification
 
-class InfiniCacheManegerSpec extends Specification
+class InfiniCacheManagerSpec extends Specification implements AutowiredTest
 {
     @Shared InfiniCacheManager manager
 
     def setupSpec() {
-        manager = new InfiniCacheManager(null)
+        manager = new InfiniCacheManager(new CacheConfig() {
+
+            @Override
+            EmbeddedCacheManager getManager()
+            {
+                new DefaultCacheManager()
+            }
+        })
     }
 
     def "Create cache"()
@@ -71,6 +81,6 @@ class InfiniCacheManegerSpec extends Specification
     }
 
     def cleanupSpec() {
-        manager.manager.close()
+        manager.manager.stop()
     }
 }

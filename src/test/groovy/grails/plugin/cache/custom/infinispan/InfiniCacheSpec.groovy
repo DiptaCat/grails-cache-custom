@@ -1,6 +1,9 @@
 package grails.plugin.cache.custom.infinispan
 
 import grails.plugin.cache.GrailsCache
+import grails.testing.spring.AutowiredTest
+import org.infinispan.manager.DefaultCacheManager
+import org.infinispan.manager.EmbeddedCacheManager
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
@@ -9,14 +12,21 @@ import spock.lang.Unroll
 import java.util.concurrent.Callable
 
 @Stepwise
-class InfiniCacheSpec extends Specification
+class InfiniCacheSpec extends Specification implements AutowiredTest
 {
     @Shared InfiniCacheManager manager
     @Shared String cacheName = 'random'
 
     def setupSpec()
     {
-        manager = new InfiniCacheManager(null)
+        manager = new InfiniCacheManager(new CacheConfig() {
+
+            @Override
+            EmbeddedCacheManager getManager()
+            {
+                new DefaultCacheManager()
+            }
+        })
     }
 
     def "Save and retrieve a value in cache"()
