@@ -13,20 +13,18 @@ import java.util.concurrent.ConcurrentHashMap
 @Slf4j
 class InfiniCacheManager implements GrailsCacheManager
 {
-    protected Config config
+    //protected Config config
     protected EmbeddedCacheManager manager
     protected ConcurrentHashMap<String, InfiniCache> cacheMap = new ConcurrentHashMap<>()
 
-    InfiniCacheManager(Config config)
+    InfiniCacheManager(CacheConfig config)
     {
-        this.config = config
-        startInfinispanManager()
-    }
-
-    private startInfinispanManager()
-    {
-        def config = new ConfigurationBuilder().build()
-        manager = new DefaultCacheManager(config,true)
+        manager = config.manager
+        log.debug("Get existing caches")
+        manager.getCacheNames().each { name ->
+            def cache = new InfiniCache(name, manager.getCache(name))
+            cacheMap.put(name, cache)
+        }
     }
 
     @Override
@@ -40,7 +38,7 @@ class InfiniCacheManager implements GrailsCacheManager
     boolean destroyCache(String s)
     {
         log.debug("Remove cache $s")
-        manager.administration().removeCache(s)
+        manager.removeCache(s)
         true
     }
 
