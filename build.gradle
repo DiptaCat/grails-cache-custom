@@ -8,7 +8,7 @@ buildscript {
     }
 }
 
-version "0.1"
+version "0.2"
 group "cat.dipta.plugins"
 
 apply plugin:"eclipse"
@@ -63,13 +63,7 @@ bootRun {
 //    developers = [johndoe:"John Doe"]
 //}
 
-//TODO: Delete
-test {
-    testLogging.showStandardStreams = true
-    testLogging {
-        events "passed"
-    }
-}
+//Needed for Wildfly to load the infinispan dependencies
 
 jar {
     manifest {
