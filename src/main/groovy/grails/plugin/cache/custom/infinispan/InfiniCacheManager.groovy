@@ -1,10 +1,7 @@
 package grails.plugin.cache.custom.infinispan
 
-import grails.config.Config
 import groovy.util.logging.Slf4j
 import org.grails.plugin.cache.GrailsCacheManager
-import org.infinispan.configuration.cache.ConfigurationBuilder
-import org.infinispan.manager.DefaultCacheManager
 import org.infinispan.manager.EmbeddedCacheManager
 import org.springframework.cache.Cache
 
@@ -13,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap
 @Slf4j
 class InfiniCacheManager implements GrailsCacheManager
 {
-    //protected Config config
     protected EmbeddedCacheManager manager
     protected ConcurrentHashMap<String, InfiniCache> cacheMap = new ConcurrentHashMap<>()
 
