@@ -30,7 +30,6 @@ class GrailsCustomCacheManager implements GrailsCacheManager, InitializingBean, 
 
     @Override
     void destroy() throws Exception {
-
     }
 
     @Override

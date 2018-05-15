@@ -8,7 +8,7 @@ buildscript {
     }
 }
 
-version "0.1"
+version "0.2"
 group "cat.dipta.plugins"
 
 apply plugin:"eclipse"
@@ -31,11 +31,16 @@ dependencies {
     provided "org.grails:grails-plugin-domain-class"
 
     compile "org.grails.plugins:cache:4.0.0.M1"
-
-    testCompile "org.grails:grails-gorm-testing-support"
-    testCompile "org.grails:grails-plugin-testing"
+    //compile "org.grails.plugins:cache:4.0.0"
 
     compile 'org.xbib.groovy:groovy-crypt:1.0.0'
+
+    compile 'org.infinispan:infinispan-core:8.2.4.Final'
+    compile 'org.infinispan:infinispan-commons:8.2.4.Final'
+
+    testCompile "org.grails.plugins:gsp"
+    testCompile "org.grails:grails-gorm-testing-support"
+    testCompile "org.grails:grails-plugin-testing"
 }
 
 bootRun {
@@ -58,3 +63,12 @@ bootRun {
 //    developers = [johndoe:"John Doe"]
 //}
 
+//Needed for Wildfly to load the infinispan dependencies
+
+jar {
+    manifest {
+        attributes (
+                'Dependencies': 'org.infinispan export'
+        )
+    }
+}
