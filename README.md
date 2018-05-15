@@ -29,9 +29,11 @@ Infinispan Wildfly Mode
 
 For the cache to work it must be enabled in the application.yml and it must have a valid JDNI pointing to the Infinispan subsystem.
 
+``` yml
 grails:
     cache:
         custom:
-            impl: 'wildfly'
+            impl: 'wildfly
             wildfly:
-	       jdni: "java:jboss/infinispan/container/test"
+                jdni: "java:jboss/infinispan/container/test"
+```
