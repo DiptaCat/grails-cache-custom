@@ -33,7 +33,7 @@ For the cache to work it must be enabled in the application.yml and it must have
 grails:
     cache:
         custom:
-            impl: 'wildfly
+            impl: 'wildfly'
             wildfly:
                 jdni: "java:jboss/infinispan/container/test"
 ```
