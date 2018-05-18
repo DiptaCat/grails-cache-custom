@@ -37,16 +37,16 @@ grails:
         custom:
             impl: 'wildfly'
             wildfly:
-                jdni: "java:jboss/infinispan/replicated_cache"
-                default: "java:jboss/infinispan/replicated_cache"
+                jdni: "java:jboss/infinispan/cache"
+                default: "java:jboss/infinispan/cache"
 ```
 2) Explicitly declare the default-cache within the web.xml that will use the plugin
 
 ```xml
 <web-app ... version="3.0">
     <resource-ref>
-        <res-ref-name>infinispan/replicated_cache/cache</res-ref-name>
-        <lookup-name>java:jboss/infinispan/replicated_cache/cache</lookup-name>
+        <res-ref-name>infinispan/cache/default</res-ref-name>
+        <lookup-name>java:jboss/infinispan/cache/default</lookup-name>
     </resource-ref>
 
     <distributable/>
