@@ -12,7 +12,7 @@ Installation
 
 To install this plugin into a grails3 application just add this dependency to build.gradle file:
 
-`compile "cat.dipta.plugins:cache-custom:0.2"`
+`compile "cat.dipta.plugins:cache-custom:0.2.1"`
 
 
 You can safely remove the grails-cache dependency as this plugin already depends on it
@@ -27,7 +27,9 @@ If you need to pre-generate db tables, you can use the SQL code in `ddl-oracle.s
 Infinispan Wildfly Mode
 -----------------------
 
-In addition, you can configure the plugin to work with the Infinispan subsystem on a Wildfly server. The settings (ex. `application.yml`) needs a valid JDNI pointing to an Infinispan container.
+In addition, you have to configure the plugin to work with the Infinispan subsystem on a Wildfly server. 
+
+1) The settings (ex. `application.yml`) needs a valid JDNI pointing to an Infinispan container.
 
 ``` yml
 grails:
@@ -35,5 +37,18 @@ grails:
         custom:
             impl: 'wildfly'
             wildfly:
-                jdni: "java:jboss/infinispan/container/test"
+                jdni: "java:jboss/infinispan/replicated_cache"
+                default: "java:jboss/infinispan/replicated_cache"
+```
+2) Explicitly declare the default-cache within the web.xml that will use the plugin
+
+```xml
+<web-app ... version="3.0">
+    <resource-ref>
+        <res-ref-name>infinispan/replicated_cache/cache</res-ref-name>
+        <lookup-name>java:jboss/infinispan/replicated_cache/cache</lookup-name>
+    </resource-ref>
+
+    <distributable/>
+</web-app>
 ```
