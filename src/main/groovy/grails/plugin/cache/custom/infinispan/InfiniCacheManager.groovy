@@ -2,6 +2,8 @@ package grails.plugin.cache.custom.infinispan
 
 import groovy.util.logging.Slf4j
 import org.grails.plugin.cache.GrailsCacheManager
+import org.infinispan.configuration.cache.CacheMode
+import org.infinispan.configuration.cache.ConfigurationBuilder
 import org.infinispan.manager.EmbeddedCacheManager
 import org.springframework.cache.Cache
 
@@ -16,7 +18,7 @@ class InfiniCacheManager implements GrailsCacheManager
     InfiniCacheManager(CacheConfig config)
     {
         manager = config.manager
-        log.debug("Get existing caches")
+        log.debug("Retrieve existing caches")
         manager.getCacheNames().each { name ->
             def cache = new InfiniCache(name, manager.getCache(name))
             cacheMap.put(name, cache)
@@ -58,10 +60,11 @@ class InfiniCacheManager implements GrailsCacheManager
         manager.getCacheNames()
     }
 
-
     protected InfiniCache createCache(String name)
     {
-        log.debug("Create cache $name")
-        new InfiniCache(name, manager.getCache(name))
+        log.debug("Creating a new cache: $name")
+
+        //Create a new cache applying the configuration retrieved from the default cache
+        new InfiniCache(name, manager.getCache(name,'default'))
     }
 }
