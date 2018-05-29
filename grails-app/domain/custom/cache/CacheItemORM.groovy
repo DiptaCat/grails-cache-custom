@@ -48,13 +48,13 @@ class CacheItemORM {
             out.writeObject(obj)
             out.flush()
             byteArray = bos.toByteArray()
-        } finally {
+        }
+        finally {
             try {
                 bos.close()
-            } catch (IOException ex) {
-                // ignore close exception
-            }
+            } catch (IOException ex) {}
         }
+
         byteArray
     }
 

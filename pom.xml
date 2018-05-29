@@ -3,12 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>cat.dipta.plugins</groupId>
   <artifactId>cache-custom</artifactId>
-  <version>0.2.1</version>
+  <version>0.2.2</version>
   <dependencies>
     <dependency>
       <groupId>org.grails.plugins</groupId>
       <artifactId>cache</artifactId>
-      <version>4.0.0.M1</version>
+      <version>4.0.0</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>

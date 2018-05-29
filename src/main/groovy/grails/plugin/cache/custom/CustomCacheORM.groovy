@@ -134,7 +134,13 @@ class CustomCacheORM implements GrailsCache {
         def oldValue = null
         CacheItemORM item = CacheItemORM.findByCacheAndKey(this.cacheORM, key)
         if (item == null) {
-            item = new CacheItemORM([cache: this.cacheORM, key: key, value: value])
+            try {
+                item = new CacheItemORM([cache: this.cacheORM, key: key, value: value])
+            } catch (e) {
+                log.error("CRITICAL ERROR storing key/value pair ($key/$value) : "+e.message)
+                e.printStackTrace()
+                return oldValue
+            }
         } else {
             oldValue = item.value
             item.value = value
