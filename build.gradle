@@ -8,7 +8,7 @@ buildscript {
     }
 }
 
-version "0.2.2"
+//version "0.2.3"
 group "cat.dipta.plugins"
 
 apply plugin:"eclipse"
@@ -49,19 +49,8 @@ bootRun {
 }
 
 // enable if you wish to package this plugin as a standalone application
-//bootRepackage.enabled = false
-// TODO: Provide values here
-//grailsPublish {
-//    user = 'user'
-//    key = 'key'
-//    githubSlug = 'foo/bar'
-//    license {
-//        name = 'Apache-2.0'
-//    }
-//    title = "My Plugin"
-//    desc = "Full plugin description"
-//    developers = [johndoe:"John Doe"]
-//}
+bootRepackage.enabled = false
+
 
 //Needed for Wildfly to load the infinispan dependencies
 jar {
@@ -69,5 +58,57 @@ jar {
         attributes (
                 'Dependencies': 'org.infinispan, org.infinispan.commons, org.jboss.as.clustering.infinispan export'
         )
+    }
+}
+
+grailsPublish {
+    // TODO: Provide values here
+//    user = 'user'
+//    key = 'key'
+//    githubSlug = 'foo/bar'
+//    license {
+//        name = 'Apache-2.0'
+//    }
+    title = "Dipta Custom Cache"
+    desc = "Custom implementation for grails cache plugin"
+    developers = [ciq_aplicacions:"CIQ - Aplicacions"]
+    vcsUrl = "https://github.com/DiptaCat/grails-cache-custom"
+}
+
+
+// https://stackoverflow.com/questions/34756023/how-do-i-publish-a-grails-3-plugin-to-my-local-nexus-repo
+
+publishing {
+    publications {
+        mavenJar(MavenPublication) {
+            pom.withXml {
+                def pomNode = asNode()
+                pomNode.dependencyManagement.replaceNode {}
+
+                // simply remove dependencies without a version
+                // version-less dependencies are handled with dependencyManagement
+                // see https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/8 for more complete solutions
+                pomNode.dependencies.dependency.findAll {
+                    it.version.text().isEmpty()
+                }.each {
+                    it.replaceNode {}
+                }
+            }
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                username System.getenv('NEXUS_USER')
+                password System.getenv('NEXUS_PASS')
+            }
+            def nexus_url = System.getenv('NEXUS_URL')
+            if (project.version.endsWith('-SNAPSHOT')) {
+                url nexus_url + '/snapshots/'
+            } else {
+                url nexus_url + '/releases/'
+            }
+        }
     }
 }

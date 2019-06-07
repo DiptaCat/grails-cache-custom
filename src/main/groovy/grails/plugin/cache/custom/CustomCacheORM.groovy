@@ -7,6 +7,7 @@ import groovy.transform.Synchronized
 import groovy.util.logging.Slf4j
 import org.springframework.cache.Cache
 import org.springframework.cache.support.SimpleValueWrapper
+import org.springframework.dao.DuplicateKeyException
 import org.xbib.groovy.crypt.CryptUtil
 
 import java.util.concurrent.Callable
@@ -84,9 +85,12 @@ class CustomCacheORM implements GrailsCache {
     @Override
     void evict(Object key) {
         log.debug "evict: $key"
-        CacheItemORM item = CacheItemORM.findByCacheAndKey(this.cacheORM, digestKey(key))
-        if (item) {
-            item.delete(flush: true)
+
+        CacheItemORM.withNewSession { session ->
+            CacheItemORM item = CacheItemORM.findByCacheAndKey(this.cacheORM, digestKey(key))
+            if (item) {
+                item.delete(flush: true)
+            }
         }
     }
 
@@ -137,15 +141,18 @@ class CustomCacheORM implements GrailsCache {
             try {
                 item = new CacheItemORM([cache: this.cacheORM, key: key, value: value])
             } catch (e) {
-                log.error("CRITICAL ERROR storing key/value pair ($key/$value) : "+e.message)
-                e.printStackTrace()
+                log.error("CRITICAL ERROR storing key/value pair ($key/$value) : "+e.message, e)
                 return oldValue
             }
         } else {
             oldValue = item.value
             item.value = value
         }
-        item.save(flush:true)
+        try {
+            item.save(flush: true)
+        } catch (DuplicateKeyException dke) {
+            log.warn("Duplicate key [$key] in cache [${this.name}]: $dke.message", dke)
+        }
 
         oldValue
     }

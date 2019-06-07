@@ -12,7 +12,7 @@ Installation
 
 To install this plugin into a grails3 application just add this dependency to build.gradle file:
 
-`compile "cat.dipta.plugins:cache-custom:0.2.1"`
+`compile "cat.dipta.plugins:cache-custom:0.2.3"`
 
 
 You can safely remove the grails-cache dependency as this plugin already depends on it
