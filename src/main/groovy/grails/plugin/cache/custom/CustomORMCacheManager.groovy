@@ -36,12 +36,14 @@ class CustomORMCacheManager implements GrailsCacheManager {
 
     @Override
     Cache getCache(String name) {
-        log.debug "getCache($name)"
+
+        log.debug "[m:getCache] name: {}", name
+
         getCacheInternal(name)
     }
 
     private Cache getCacheInternal(String name, boolean create = true) {
-        def cacheORM = null;
+        def cacheORM = null
         CacheORM.withNewSession {
             cacheORM = CacheORM.findByName(name)
         }

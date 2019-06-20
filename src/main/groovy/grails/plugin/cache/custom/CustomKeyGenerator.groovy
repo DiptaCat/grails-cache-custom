@@ -3,6 +3,7 @@ package grails.plugin.cache.custom
 import grails.plugin.cache.GrailsCacheKeyGenerator
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
+import groovy.util.logging.Slf4j
 import org.springframework.aop.framework.AopProxyUtils
 import org.springframework.cache.interceptor.KeyGenerator
 import org.springframework.cache.interceptor.SimpleKeyGenerator
@@ -10,16 +11,19 @@ import org.springframework.cache.interceptor.SimpleKeyGenerator
 import java.lang.reflect.Method
 
 @CompileStatic
+@Slf4j
 class CustomKeyGenerator implements KeyGenerator, GrailsCacheKeyGenerator {
 
     private final KeyGenerator innerKeyGenerator
 
     CustomKeyGenerator(KeyGenerator innerKeyGenerator) {
+        log.debug "[m:CustomKeyGenerator] innerKeyGenerator: {}", innerKeyGenerator
         this.innerKeyGenerator = innerKeyGenerator
     }
 
     CustomKeyGenerator() {
         this.innerKeyGenerator = new SimpleKeyGenerator()
+        log.debug "[m:CustomKeyGenerator] innerKeyGenerator: {}", innerKeyGenerator
     }
 
 
@@ -30,6 +34,8 @@ class CustomKeyGenerator implements KeyGenerator, GrailsCacheKeyGenerator {
 
     Object generate(Object target, Method method, Object... params) {
         Class<?> objClass = AopProxyUtils.ultimateTargetClass(target)
+
+        log.debug "[m:generate] params: {}", params
 
         return new CacheKey(
                 objClass.getName().intern(),
@@ -78,6 +84,9 @@ class CustomKeyGenerator implements KeyGenerator, GrailsCacheKeyGenerator {
 
         CacheKey(String targetClassName, String targetMethodName,
                  int targetObjectHashCode, Object simpleKey) {
+
+            log.debug "[m:CacheKey] simpleKey: {}", simpleKey
+
             this.targetClassName = targetClassName
             this.targetMethodName = targetMethodName
 //            this.targetObjectHashCode = targetObjectHashCode
@@ -96,10 +105,18 @@ class CustomKeyGenerator implements KeyGenerator, GrailsCacheKeyGenerator {
 
         TemporaryGrailsCacheKey(String targetClassName, String targetMethodName,
                                 int targetObjectHashCode, Object simpleKey) {
-            this.targetClassName = targetClassName
-            this.targetMethodName = targetMethodName
-//            this.targetObjectHashCode = targetObjectHashCode
+            // this.targetClassName = targetClassName
+            // this.targetMethodName = targetMethodName
+            // this.targetObjectHashCode = targetObjectHashCode
+
+            /**
+             * Es posa només la simpleKey i serà només amb aquest paràmetre el quin farà un únic hash
+             * Mirar @EqualsAndHashCode i:
+             * https://sai.intranet.dtgna/confluence/display/ACTIO/Plugin+grails-cache-custom
+             */
             this.simpleKey = simpleKey
+
+            log.debug "[m:TemporaryGrailsCacheKey] this: {}, simpleKey: {}", this, simpleKey
         }
     }
 

@@ -10,6 +10,7 @@ import org.springframework.cache.support.SimpleValueWrapper
 import org.springframework.dao.DuplicateKeyException
 import org.xbib.groovy.crypt.CryptUtil
 
+import java.sql.SQLIntegrityConstraintViolationException
 import java.util.concurrent.Callable
 
 @Slf4j
@@ -22,7 +23,7 @@ class CustomCacheORM implements GrailsCache {
         this.name = name
         this.cacheORM = cacheORM
 
-        log.debug "CustomCacheORM: $name, $cacheORM"
+        log.debug "[m:CustomCacheORM]: name: {}, cacheORM: {}", name, cacheORM
     }
 
 
@@ -37,7 +38,21 @@ class CustomCacheORM implements GrailsCache {
 
     @Override
     Cache.ValueWrapper get(Object key) {
-        log.debug "get(1): ${key.dump()}"
+        log.debug "[m:get] cache: {}, key: {}, key.dump(): {}", name, key, key.dump()
+
+        /*key.getProperties().each {
+            log.debug "[m:get]: key: {}, value: {}", it.key, it.value
+        }*/
+
+        /*
+        El log de dalt mostra:
+
+        2019-06-14 10:44:35.998 DEBUG [m:get]: key: class, value: class grails.plugin.cache.custom.CustomKeyGenerator$TemporaryGrailsCacheKey
+        2019-06-14 10:44:35.998 DEBUG [m:get]: key: simpleKey, value: {}
+        2019-06-14 10:44:35.998 DEBUG [m:get]: key: targetMethodName, value: null
+        2019-06-14 10:44:35.998 DEBUG [m:get]: key: targetClassName, value: null
+         */
+
         CacheItemORM.withNewSession {
             def value = this.internalGet(digestKey(key))
             value == null ? null : new SimpleValueWrapper(value)
@@ -46,7 +61,14 @@ class CustomCacheORM implements GrailsCache {
 
     @Override
     def <T> T get(Object key, Class<T> type) {
-        log.debug "get(2): $key, $type"
+        log.debug "[m:get]: cache: {}, key: {}, tye: {}", name, key, type
+
+/*
+        key.getProperties().each {
+            log.debug "[m:get]: key: {}, value: {}", it.key, it.value
+        }
+*/
+
         def value = this.internalGet(digestKey(key))
         if (value != null && type != null && !type.isInstance(value)) {
             throw new IllegalStateException("Cached value is not of required type [" + type.getName() + "]: " + value)
@@ -56,13 +78,13 @@ class CustomCacheORM implements GrailsCache {
 
     @Override
     def <T> T get(Object key, Callable<T> valueLoader) {
-        log.debug "get(3): $key"
+        log.debug "[m:get]: cache: {}, key: {}", name, key
         throw new UnsupportedOperationException()
     }
 
     @Override
     void put(Object key, Object value) {
-        log.debug "put: $key, $value"
+        log.debug "[m:put]: cache: {}, key: {}, value: {}", name, key, value
         CacheItemORM.withNewSession {
             this.internalPut(digestKey(key), value)
         }
@@ -71,7 +93,7 @@ class CustomCacheORM implements GrailsCache {
     @Override
     @Synchronized
     Cache.ValueWrapper putIfAbsent(Object key, Object value) {
-        log.debug "putIfAbsent: $key, $value"
+        log.debug "[m:putIfAbsent]: cache: {}, key: {}, value: {}", name, key, value
         def digestedKey = digestKey(key)
         def existingValue = this.internalGet(digestedKey)
         if (existingValue == null) {
@@ -84,7 +106,7 @@ class CustomCacheORM implements GrailsCache {
 
     @Override
     void evict(Object key) {
-        log.debug "evict: $key"
+        log.debug "[m:evict]: cache: {}, key: {}", name, key
 
         CacheItemORM.withNewSession { session ->
             CacheItemORM item = CacheItemORM.findByCacheAndKey(this.cacheORM, digestKey(key))
@@ -96,7 +118,7 @@ class CustomCacheORM implements GrailsCache {
 
     @Override
     void clear() {
-        log.debug 'clear'
+        log.debug "[m:clear] cache: {} ..", name
 
         CacheItemORM.withNewSession { session ->
             CacheItemORM.deleteAll(CacheItemORM.findAllByCache(this.cacheORM))
@@ -115,7 +137,7 @@ class CustomCacheORM implements GrailsCache {
 
     @Override
     Collection<Object> getAllKeys() {
-        log.debug 'getAllKeys'
+        log.debug "[m:getAllKeys] cache: {}", name
         CacheItemORM.findAllByCache(this.cacheORM)*.key
     }
 
@@ -124,7 +146,7 @@ class CustomCacheORM implements GrailsCache {
     // -------------------------------------------------
 
     private def internalGet(key) {
-        log.debug "internalGet(${this.cacheORM}, $key)"
+        log.debug "[m:internalGet] cache: {}, this.cacheORM: {}, key: {}", name, this.cacheORM, key
         CacheItemORM item = CacheItemORM.findByCacheAndKey(this.cacheORM, key)
         if (item) {
             return item.value
@@ -134,14 +156,14 @@ class CustomCacheORM implements GrailsCache {
     }
 
     private def internalPut(key, value) {
-        log.debug "internalPut(${this.name}, $key)"
+        log.debug "[m:internalPut] this.name: {}, key: {}", this.name, key
         def oldValue = null
         CacheItemORM item = CacheItemORM.findByCacheAndKey(this.cacheORM, key)
         if (item == null) {
             try {
                 item = new CacheItemORM([cache: this.cacheORM, key: key, value: value])
             } catch (e) {
-                log.error("CRITICAL ERROR storing key/value pair ($key/$value) : "+e.message, e)
+                log.error("[m:internalPut] cache: $name, CRITICAL ERROR storing key/value pair ($key/$value) : "+e.message, e)
                 return oldValue
             }
         } else {
@@ -151,7 +173,9 @@ class CustomCacheORM implements GrailsCache {
         try {
             item.save(flush: true)
         } catch (DuplicateKeyException dke) {
-            log.warn("Duplicate key [$key] in cache [${this.name}]: $dke.message", dke)
+            log.warn("[m:internalPut] cache: $name, Duplicate key [$key] in cache [${this.name}]: $dke.message", dke)
+        } catch (SQLIntegrityConstraintViolationException sqlIntegrityConstraintViolationException) {
+            log.warn("[m:internalPut] cache: $name, Duplicate key [$key] in cache [${this.name}]: $sqlIntegrityConstraintViolationException.message", sqlIntegrityConstraintViolationException)
         }
 
         oldValue
@@ -159,8 +183,9 @@ class CustomCacheORM implements GrailsCache {
 
 
     private static String digestKey(Serializable key) {
+        //log.debug "[m:digestKey] key: {}, hashCode: {}, Key resultant: {}, simpleKey: {}", key, key.hashCode(), CryptUtil.sha256(String.valueOf(key.hashCode())), key.getAt('simpleKey')
+
         CryptUtil.sha256(String.valueOf(key.hashCode()))
     }
-
 
 }
