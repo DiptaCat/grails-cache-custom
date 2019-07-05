@@ -172,10 +172,8 @@ class CustomCacheORM implements GrailsCache {
         }
         try {
             item.save(flush: true)
-        } catch (DuplicateKeyException dke) {
-            log.warn("[m:internalPut] cache: $name, Duplicate key [$key] in cache [${this.name}]: $dke.message", dke)
-        } catch (SQLIntegrityConstraintViolationException sqlIntegrityConstraintViolationException) {
-            log.warn("[m:internalPut] cache: $name, Duplicate key [$key] in cache [${this.name}]: $sqlIntegrityConstraintViolationException.message", sqlIntegrityConstraintViolationException)
+        } catch (Exception e) {
+            log.warn("[m:internalPut] cache: $name, Duplicate key [$key] in cache [${this.name}]: $e.message")
         }
 
         oldValue
