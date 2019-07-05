@@ -111,8 +111,7 @@ class CustomKeyGenerator implements KeyGenerator, GrailsCacheKeyGenerator {
 
             /**
              * Es posa només la simpleKey i serà només amb aquest paràmetre el quin farà un únic hash
-             * Mirar @EqualsAndHashCode i:
-             * https://sai.intranet.dtgna/confluence/display/ACTIO/Plugin+grails-cache-custom
+             * Mirar @EqualsAndHashCode
              */
             this.simpleKey = simpleKey
 
