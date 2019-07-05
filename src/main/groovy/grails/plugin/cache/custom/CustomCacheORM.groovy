@@ -44,14 +44,6 @@ class CustomCacheORM implements GrailsCache {
             log.debug "[m:get]: key: {}, value: {}", it.key, it.value
         }*/
 
-        /*
-        El log de dalt mostra:
-
-        2019-06-14 10:44:35.998 DEBUG [m:get]: key: class, value: class grails.plugin.cache.custom.CustomKeyGenerator$TemporaryGrailsCacheKey
-        2019-06-14 10:44:35.998 DEBUG [m:get]: key: simpleKey, value: {}
-        2019-06-14 10:44:35.998 DEBUG [m:get]: key: targetMethodName, value: null
-        2019-06-14 10:44:35.998 DEBUG [m:get]: key: targetClassName, value: null
-         */
 
         CacheItemORM.withNewSession {
             def value = this.internalGet(digestKey(key))
